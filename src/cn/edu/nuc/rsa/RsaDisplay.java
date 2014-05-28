@@ -1,10 +1,13 @@
 package cn.edu.nuc.rsa;
 
-import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
 public class RsaDisplay extends JFrame{
+	
+	public static RsaUtil rsa = new RsaUtil();
 	
 	JSplitPane splitPane = new JSplitPane();
 	JPanel leftPanel = new JPanel();
@@ -53,6 +56,41 @@ public class RsaDisplay extends JFrame{
 	//right part
 	JButton encodeButton = new JButton(ENCODE);
 	JButton decodeButton = new JButton(DECODE);
+	
+	ActionListener buttonListener = new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if (e.getSource() == randomGenerateButton) {
+				rsa.init();
+				bigPrimerPText.setText(rsa.getBigPrimerP() + "");
+				bigPrimerQText.setText(rsa.getBigPrimerQ() + "");
+				publicKeyText.setText(rsa.getPublicKey() + "");
+			} else if (e.getSource() == generateKey) {
+				int primerP = Integer.parseInt(bigPrimerPText.getText());
+				int primerQ = Integer.parseInt(bigPrimerQText.getText());
+				int publicKey = Integer.parseInt(publicKeyText.getText());
+				rsa.setBigPrimerP(primerP);
+				rsa.setBigPrimerQ(primerQ);
+				rsa.setPmultiQN(primerQ * primerP); 
+				rsa.setPublicKey(publicKey);
+				rsa.setPrivateKey(rsa.CaculatePrivateKey());
+			
+				publicKeyPair.setText("<" + rsa.getPmultiQN() + ", " + rsa.getPublicKey() + ">");
+				privateKeyPair.setText("<" + rsa.getPmultiQN() + ", " + rsa.getPrivateKey() + ">");
+			} else if (e.getSource() == encodeButton) {
+				
+				int plainText = Integer.parseInt(plaintTextArea.getText());
+				int cipherText = rsa.encode(plainText);
+				cipherTextArea.setText(cipherText + "");
+			} else if (e.getSource() == decodeButton) {
+				int cipherText = Integer.parseInt(cipherTextArea.getText());
+				int plainText = rsa.decode(cipherText);
+				plaintTextAreaCopy.setText(plainText + "");
+			}
+		}
+	};
 	public RsaDisplay() {
 		this.add(splitPane);
 		splitPane.setLeftComponent(leftPanel);
@@ -113,14 +151,22 @@ public class RsaDisplay extends JFrame{
 		plaintTextAreaCopy.setBounds(160, 390, 160, 80);
 		
 		
+
 		this.setTitle("RSAº”√‹À„∑®");
 		this.setSize(800, 600);
 		this.setLocation(300, 80);
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
 	}
-	
+	public void InitListener() {
+		randomGenerateButton.addActionListener(buttonListener);
+		generateKey.addActionListener(buttonListener);
+		encodeButton.addActionListener(buttonListener);
+		decodeButton.addActionListener(buttonListener);
+	}
+
 	public static void main(String[] args) {
 		RsaDisplay rsaDisplay = new RsaDisplay();
+		rsaDisplay.InitListener();
 	}
 }
